@@ -185,25 +185,13 @@ public class ScrollViewContainer extends RelativeLayout {
                     break;
                 }
 
-                if (
-//                        Math.abs(mYV) < 500
-                       Math.abs(mMoveLen) >300
-                        ) {
-                    // 速度小于一定值的时候当作静止释放，这时候两个View往哪移动取决于滑动的距离
-                    if (mMoveLen <= -mViewHeight / 2) {
-                        state = AUTO_UP;
-                    } else if (mMoveLen > -mViewHeight / 2) {
-                        state = AUTO_DOWN;
-                    }
-                } else {
-                    // 抬起手指时速度方向决定两个View往哪移动
-                    if (mYV < 0){
-                        state = AUTO_UP;
 
-                    }else{
-                        state = AUTO_DOWN;
-                    }
+                if (mMoveLen <= -mViewHeight / 2) {
+                    state = AUTO_UP;
+                } else if (mMoveLen > -mViewHeight / 2) {
+                    state = AUTO_DOWN;
                 }
+
                 mTimer.schedule(2);
                 try {
                     vt.recycle();

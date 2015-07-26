@@ -45,8 +45,6 @@ public class ScrollViewContainer extends RelativeLayout {
     private int mViewHeight;
     private int mViewWidth;
 
-//    private View topView;
-//    private View bottomView;
     private ScrollView topScrollView;
     private ScrollView bottomScrollView;
     private boolean canPullDown;
@@ -98,11 +96,6 @@ public class ScrollViewContainer extends RelativeLayout {
     };
 
 
-
-//    public ScrollViewContainer(Context context, AttributeSet attrs, int defStyle) {
-//        super(context, attrs, defStyle);
-//        init();
-//    }
     public void addContainer(View topView,View bottomView){
         topScrollView.addView(topView);
         bottomScrollView.addView(bottomView);

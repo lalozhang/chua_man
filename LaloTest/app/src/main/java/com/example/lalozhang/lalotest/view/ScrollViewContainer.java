@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
@@ -32,7 +33,7 @@ public class ScrollViewContainer extends RelativeLayout {
     /**
      * 动画速度
      */
-    public static final float SPEED = 6.5f;
+    public static final float SPEED = 20f;
 
     private boolean isMeasured = false;
 
@@ -44,9 +45,10 @@ public class ScrollViewContainer extends RelativeLayout {
     private int mViewHeight;
     private int mViewWidth;
 
-    private View topView;
-    private View bottomView;
-
+//    private View topView;
+//    private View bottomView;
+    private ScrollView topScrollView;
+    private ScrollView bottomScrollView;
     private boolean canPullDown;
     private boolean canPullUp;
     private int state = DONE;
@@ -97,23 +99,37 @@ public class ScrollViewContainer extends RelativeLayout {
 
 
 
-    public ScrollViewContainer(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init();
+//    public ScrollViewContainer(Context context, AttributeSet attrs, int defStyle) {
+//        super(context, attrs, defStyle);
+//        init();
+//    }
+    public void addContainer(View topView,View bottomView){
+        topScrollView.addView(topView);
+        bottomScrollView.addView(bottomView);
     }
+
 
     private void init() {
         mTimer = new MyTimer(handler);
+        topScrollView=new ScrollView(getContext());
+        bottomScrollView =new ScrollView(getContext());
+        LayoutParams lp =new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        topScrollView.setLayoutParams(lp);
+        bottomScrollView.setLayoutParams(lp);
+        addView(topScrollView);
+        addView(bottomScrollView);
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                if (vt == null)
+                if (vt == null){
                     vt = VelocityTracker.obtain();
-                else
+                }else{
                     vt.clear();
+                }
+
                 mLastY = ev.getY();
                 vt.addMovement(ev);
                 mEvents = 0;
@@ -162,11 +178,13 @@ public class ScrollViewContainer extends RelativeLayout {
             case MotionEvent.ACTION_UP:
                 mLastY = ev.getY();
                 vt.addMovement(ev);
-                vt.computeCurrentVelocity(700);
+                vt.computeCurrentVelocity(200);
                 // 获取Y方向的速度
                 float mYV = vt.getYVelocity();
-                if (mMoveLen == 0 || mMoveLen == -mViewHeight)
+                if (mMoveLen == 0 || mMoveLen == -mViewHeight){
                     break;
+                }
+
                 if (Math.abs(mYV) < 500) {
                     // 速度小于一定值的时候当作静止释放，这时候两个View往哪移动取决于滑动的距离
                     if (mMoveLen <= -mViewHeight / 2) {
@@ -176,10 +194,12 @@ public class ScrollViewContainer extends RelativeLayout {
                     }
                 } else {
                     // 抬起手指时速度方向决定两个View往哪移动
-                    if (mYV < 0)
+                    if (mYV < 0){
                         state = AUTO_UP;
-                    else
+
+                    }else{
                         state = AUTO_DOWN;
+                    }
                 }
                 mTimer.schedule(2);
                 try {
@@ -201,11 +221,11 @@ public class ScrollViewContainer extends RelativeLayout {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        topView.layout(0, (int) mMoveLen, mViewWidth,
-                topView.getMeasuredHeight() + (int) mMoveLen);
-        bottomView.layout(0, topView.getMeasuredHeight() + (int) mMoveLen,
-                mViewWidth, topView.getMeasuredHeight() + (int) mMoveLen
-                        + bottomView.getMeasuredHeight());
+        topScrollView.layout(0, (int) mMoveLen, mViewWidth,
+                topScrollView.getMeasuredHeight() + (int) mMoveLen);
+        bottomScrollView.layout(0, topScrollView.getMeasuredHeight() + (int) mMoveLen,
+                mViewWidth, topScrollView.getMeasuredHeight() + (int) mMoveLen
+                        + bottomScrollView.getMeasuredHeight());
     }
 
     @Override
@@ -217,11 +237,8 @@ public class ScrollViewContainer extends RelativeLayout {
             mViewHeight = getMeasuredHeight();
             mViewWidth = getMeasuredWidth();
 
-            topView = getChildAt(0);
-            bottomView = getChildAt(1);
-
-            bottomView.setOnTouchListener(bottomViewTouchListener);
-            topView.setOnTouchListener(topViewTouchListener);
+            bottomScrollView.setOnTouchListener(bottomViewTouchListener);
+            topScrollView.setOnTouchListener(topViewTouchListener);
         }
     }
 
@@ -231,10 +248,11 @@ public class ScrollViewContainer extends RelativeLayout {
         public boolean onTouch(View v, MotionEvent event) {
             ScrollView sv = (ScrollView) v;
             if (sv.getScrollY() == (sv.getChildAt(0).getMeasuredHeight() - sv
-                    .getMeasuredHeight()) && mCurrentViewIndex == 0)
+                    .getMeasuredHeight()) && mCurrentViewIndex == 0){
                 canPullUp = true;
-            else
+            }else{
                 canPullUp = false;
+            }
             return false;
         }
     };
@@ -243,10 +261,12 @@ public class ScrollViewContainer extends RelativeLayout {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             ScrollView sv = (ScrollView) v;
-            if (sv.getScrollY() == 0 && mCurrentViewIndex == 1)
+            if (sv.getScrollY() == 0 && mCurrentViewIndex == 1){
                 canPullDown = true;
-            else
+            }else{
                 canPullDown = false;
+            }
+
             return false;
         }
     };
